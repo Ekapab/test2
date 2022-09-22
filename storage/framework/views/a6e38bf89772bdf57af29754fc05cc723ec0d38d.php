@@ -195,12 +195,14 @@ async function doSetup(url){
                         title: 'ไม่สามารถเข้าใช้งานได้...',
                         text: data.massage ,
                     })
+                    $('#FTUsrCode').focus()
                 }else if(data.status==501){
                     Swal.fire({
                         icon: 'warning',
                         title: 'แจ้งเตือน...',
                         text: data.massage ,
                     })
+                    $('#FTUsrCode').focus()
                 }else{
                     //error
                     Swal.fire({
@@ -208,6 +210,7 @@ async function doSetup(url){
                         title: 'ผิดพลาด...',
                         text: data.data ,
                     })
+                    $('#FTUsrCode').focus()
                 }
                 console.log(data)
             })
