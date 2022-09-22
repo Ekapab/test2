@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<title>ระบบหน้าร้าน</title>
-
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <meta name="ekp-token" content="<?php echo e(config('API_TOKEN')); ?>">
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome -->
@@ -28,7 +29,7 @@
 <body class="hold-transition login-page">
     <!-- Preloader -->
 <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__shake" src="<?php echo e(asset('assets/dist/img/AdminLTELogo.png')); ?>" alt="AdminLTELogo" height="60" width="60">
+    <img class="animation__shake" src="<?php echo e(asset('assets/img/logo-2-mob.png')); ?>" alt="AdminLTELogo" height="60" width="60">
 </div>
     <div class="login-box">
         <!-- /.login-logo -->
@@ -38,28 +39,22 @@
             </div>
             <div class="card-body">
                 
-                <?php if(session('status')): ?>
-                <div class="alert <?php echo e(session('class')); ?> alert-no-border alert-txt-colored alert-close alert-dismissible fade in" role="alert"><?php echo e(session('status')); ?>
-
-                </div>
-                <?php endif; ?>
-                <form action="Authenticated" method="post">
-                    <?php echo csrf_field(); ?>
+                <form id="Authen"  action="Authenticated" method="post">
                     <div class="input-group mb-3">
                         <div class="input-group-text">
                             <i class="fas fa-user"></i>
                         </div>
-                        <input type="text" name ="FTUsrCode" class="form-control" placeholder="รหัสพนักงาน" required>
-                    <div class="input-group-append">
+                        <input type="text" id="FTUsrCode" name ="FTUsrCode" class="form-control" placeholder="รหัสพนักงาน" required autofocus>
+                        <div class="input-group-append">
 
 
-                    </div>
+                        </div>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-text">
                             <span class="fas fa-lock"></span>
                         </div>
-                        <input type="password" name="FTUsrPass" class="form-control" placeholder="รหัสผ่าน" required>
+                        <input type="password" id="FTUsrPass" name="FTUsrPass" class="form-control" placeholder="รหัสผ่าน" required>
                         <div class="input-group-append">
 
                         </div>
@@ -74,17 +69,14 @@
                             </div>
                         </div>
                         <!-- /.col -->
-                        <div class="col-4">
-                            <button type="submit" class="btn btn-primary btn-block toastrDefaultError">Sign In</button>
-
-                        </div>
+                        
                         <!-- /.col -->
                     </div>
                     <button type="submit" class="btn btn-success btn-block"><span class="glyphicon glyphicon-log-in" ></span>&nbsp; เข้าสู่ระบบ</button>
                     <a href="<?php echo e(url('/WorkTime')); ?>" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-time"></span>&nbsp; ลงเวลาทำงาน</a>
                     <div class="text-center">
                         Laravel v<?php echo e(Illuminate\Foundation\Application::VERSION); ?> (PHP v<?php echo e(PHP_VERSION); ?>)
-                        <button type="submit" class="btn btn-primary wait">Sign In</button>
+                        <button type="submit" class="btn btn-primary wait" onclick="doSetup('google.com')">Sign In</button>
                     </div>
                 </form>
             </div>
@@ -105,49 +97,132 @@
     <!-- SweetAlert2 -->
     <script src="<?php echo e(asset('assets/plugins/sweetalert2/sweetalert2.min.js')); ?>"></script>
     <script>
-        $('.toastrDefaultError').click(function() {
-            //toastr.error('Lorem ipsum dolor sit amet, consetetur sadipscing elitr.')
-            $(document).Toasts('create', {
-                class: 'bg-danger',
-                title: 'Toast Title',
-                autohide: true,
-                delay: 750,
-                body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
-            })
-        });
+//         $('.toastrDefaultError').click(function() {
+//             //toastr.error('Lorem ipsum dolor sit amet, consetetur sadipscing elitr.')
+//             $(document).Toasts('create', {
+//                 class: 'bg-danger',
+//                 title: 'Toast Title',
+//                 autohide: true,
+//                 delay: 750,
+//                 body: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.'
+//             })
+//         });
+        var app = "<?php echo e(config('app.name')); ?>"
+        var devmode = "<?php echo e(config('app.env')); ?>"
+        console.log('devmode : '+ devmode)
+        if(devmode=='local'){
+            console.log('devmode : This is Dev Mode')
+            var href = window.location.origin
+        }else{
+            console.log('devmode : This is Production Mode')
+            var href = window.location.origin +'/'+ app;
+        }
+        var Usr = "<?php echo e(Session::get('FTUsrName')); ?>"
+        var url = window.location.href
+        var Bchcode ="<?php echo e(Session::get('Bchcode')); ?>"
+        var elem = document.documentElement
 
-        $('.wait').click(function(){
-            let timerInterval
+
+        function waitload(timerInterval,text){
             Swal.fire({
-            title: 'Auto close alert!',
-            html: 'I will close in <b></b> milliseconds.',
-            timer: 2000,
-            timerProgressBar: true,
-            didOpen: () => {
-                Swal.showLoading()
-                const b = Swal.getHtmlContainer().querySelector('b')
-                timerInterval = setInterval(() => {
-                b.textContent = Swal.getTimerLeft()
-                }, 100)
-            },
-            willClose: () => {
-                clearInterval(timerInterval)
-            }
+                title: text ,
+                html: 'I will close in <b></b> milliseconds.',
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading()
+                    const b = Swal.getHtmlContainer().querySelector('b')
+                    timerInterval = setInterval(() => {
+                    b.textContent = Swal.getTimerLeft()
+                    }, 100)
+                },
+                willClose: () => {
+                    clearInterval(timerInterval)
+                }
             }).then((result) => {
                 /* Read more about handling dismissals below */
                 if (result.dismiss === Swal.DismissReason.timer) {
                     console.log('I was closed by the timer')
                 }
             })
+       }
+//## ตัวอย่างการทำ Popup สำหรับ QR Code
+async function doSetup(url){
+    const screenDetails = await window.getScreenDetails()
+    if (screen.isExtended && screenDetails.screens.length > 1) {
+        const newChildWindow = window.open(
+        url,
+        'New Child Window',
+        `popup,width=${800},height=${600},left=0,top=0`
+        )
+        newChildWindow.moveTo(screenDetails.screens[1].left, 0)
+    }else{
+        const newChildWindow = window.open(
+        url,
+        'New Child Window',
+        `popup,width=${800},height=${600},left=0,top=0`
+        )
+    }
+}
+
+    $(document).ready(function() {
+        console.log('Load')
+        $('#Authen').submit(function(e){
+            e.preventDefault()
+            var FTUsrPass = $('#FTUsrPass').val()
+            var FTUsrCode = $('#FTUsrCode').val()
+            var formData = {
+                'FTUsrCode' : FTUsrCode,
+                'FTUsrPass' : FTUsrPass,
+            }
+            fetch("<?php echo e(url('Authenticated')); ?>", {
+                method: 'POST', // or 'PUT'
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
+                },
+                body: JSON.stringify(formData),
+            })
+            .then(function(res) { return res.json(); })
+            .then(data => {
+                if(data.status==200){
+                    // Next Page to data[0]
+                    console.log(data)
+                    window.location = href + '/aa'
+                }else if(data.status==500){
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'ไม่สามารถเข้าใช้งานได้...',
+                        text: data.massage ,
+                    })
+                }else if(data.status==501){
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'แจ้งเตือน...',
+                        text: data.massage ,
+                    })
+                }else{
+                    //error
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ผิดพลาด...',
+                        text: data.data ,
+                    })
+                }
+                console.log(data)
+            })
+            .catch((error) => {
+                console.log('Error:', error);
+            })
+            console.log('prevent')
+            waitload('1000','รอ')
+
+            $('#Authen')[0].reset()
         })
 
+
+    })
     </script>
     </body>
-
-    
-                        
-                
-        <!--<script src="https://code.jquery.com/jquery-3.5.1.js" defer></script>-->
-      
 </html>
 <?php /**PATH D:\Ekapab\frontend2\resources\views/Authentication/login.blade.php ENDPATH**/ ?>

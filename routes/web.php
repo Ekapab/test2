@@ -16,16 +16,18 @@ use App\Http\Controllers\AuthenticationController;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/aa',function(){
-    return view('index');
-});
-	//Auth
-	Route::get('/login', [AuthenticationController::class,'index']);
-	Route::post('/Authenticated',[AuthenticationController::class,'Authenticated']);
-	Route::get('/Logout',[AuthenticationController::class,'Logout']);
-	Route::post('/Password',[AuthenticationController::class,'updatePassword']);
-    Route::post('/HPassword',[AuthenticationController::class,'HPassword']);
-	Route::get('/GetUser',[AuthenticationController::class,'getDataUser']);
-    Route::get('api/getuser', [AuthenticationController::class,'getuser']);
-    Route::post('api/getlog', [AuthenticationController::class,'getlog']);
-    Route::get('api/getlog', [AuthenticationController::class,'getlogs']);
+// Route::get('/aa',function(){
+//     return view('index');
+// });
+Route::get('/aa',[AuthenticationController::class,'layout']);
+//Auth
+Route::get('/login', [AuthenticationController::class,'index']);
+Route::post('/Authenticated',[AuthenticationController::class,'Authenticated']);
+Route::get('/Logout',[AuthenticationController::class,'Logout']);
+Route::post('/Password',[AuthenticationController::class,'updatePassword']);
+Route::post('/HPassword',[AuthenticationController::class,'HPassword']);
+Route::get('/GetUser',[AuthenticationController::class,'getDataUser']);
+Route::get('api/getuser', [AuthenticationController::class,'getuser']);
+Route::post('api/getlog', [AuthenticationController::class,'getlog']);
+Route::get('api/getlog', [AuthenticationController::class,'getlogs']);
+Route::get('/Product',[AuthenticationController::class,'Product']);

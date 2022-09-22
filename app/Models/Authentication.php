@@ -4,9 +4,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-class Authentication extends Model{
+class Authentication extends Model
+{
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'TSysUser';
 
-    public function getlog($request)
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'FTUsrCode';
+
+
+    public static function getlog($request)
     {
         $dt = Carbon::now(("Asia/Bangkok"));
         DB::table('FNLogSys')->insert([
@@ -18,7 +34,7 @@ class Authentication extends Model{
         ]);
     }
 
-    public function getlogs()
+    public static function getlogs()
     {
         $users = DB::table('FNLogSys')//->get();
                     ->whereDate('SysDate',date("Y-m-d"))
@@ -27,12 +43,12 @@ class Authentication extends Model{
         //return $users;
     }
 
-    public function getCompany(){
+    public static function getCompany(){
         $result = DB::table('TCNMComp')->get();
         return $result;
     }
 
-    public function getuser()
+    public static function getuser()
     {
         $users = DB::table('TSysUser')//->get();
                     ->select('FTUsrCode','FTUsrName','FTDptCode')
@@ -42,7 +58,7 @@ class Authentication extends Model{
         //return $users;
     }
 
-    public function getUsrData($request){
+    public static function getUsrData($request){
         $result = DB::table('TSysUser')
                     ->where('FTUsrCode',$request['FTUsrCode'])
                     ->where('FTUsrAddr',$request['FTUsrPass'])
@@ -55,7 +71,7 @@ class Authentication extends Model{
         //return $result;
     }
 
-    public function getUsrDetail($FTUsrCode){
+    public static function getUsrDetail($FTUsrCode){
         $result=DB::table('TSysUser')
                 ->where('FTUsrCode',$FTUsrCode)
                 ->get();
@@ -65,7 +81,7 @@ class Authentication extends Model{
         return $result;
     }
 
-    public function updatePassword($request){
+    public static function updatePassword($request){
         $affected = DB::table('TSysUser')
               ->where('FTUsrCode', $request['usrcode'])
               ->update([
@@ -82,34 +98,27 @@ class Authentication extends Model{
         // }
     }
 
-    public function getPermissionMenu($usrCode){
+    public static function getPermissionMenu($usrCode){
         $result = DB::table('TSysUserMenu')
                     ->select('FTMnuOrder','TSysMenu.FTMnuName','FTMnuThaDesc','FTMnuEngDesc','FNMnuVisible')
                     ->join('TSysMenu', 'TSysUserMenu.FTMnuName', '=', 'TSysMenu.FTMnuName')
                     ->where('FTUsrCode',$usrCode)
                     ->where('TSysMenu.FTMnuOrder','like','FN%')
-                    ->orderBy('FTMnuLevel','FTMnuOrder')
+                    ->orderBy('FTMnuLevel','asc')
+                    ->orderBy('FTMnuOrder','asc')
                     ->get();
         if($result->isEmpty()){
             return False;
         }else{
             return $result;
         }
-        // $return = DB::Select("
-        // select FTMnuOrder,TSysMenu.FTMnuName,FTMnuThaDesc,FTMnuEngDesc,FNMnuVisible
-        // from TSysUserMenu
-        // join TSysMenu on TSysUserMenu.FTMnuName=TSysMenu.FTMnuName
-        // where FTUsrCode='$usrCode'
-        // and TSysMenu.FTMnuOrder  like 'FN%'
-        // order by FTMnuLevel,FTMnuOrder");
-
-        // return $return;
     }
 
-    public function updateHashPassword($request)
+    public static function updateHashPassword($request)
     {
         $password = $request['password']; // get the value of password field
         $hashed = Hash::make($password); // encrypt the password
         return $hashed;
     }
+
 }

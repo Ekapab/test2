@@ -6,11 +6,13 @@ use Illuminate\Support\Facades\Session;
 use Validator;
 class AuthenticationController extends Controller{
 
-   	public function index(){
+   	public function index()
+    {
    		return view('Authentication.login');
     }
 
-	public function Authenticated(Request $request){
+	public function Authenticated(Request $request)
+    {
 		$Authen = new Authentication();
         $comp = $Authen->getCompany();
         if($comp!= false){
@@ -35,37 +37,40 @@ class AuthenticationController extends Controller{
                 'UsrName'   => $row->FTUsrName,
                 'UsrCode'   => $row->FTUsrCode
             ]);
-			// Session::put('FTUsrCode',$row->FTUsrCode);
-	    	// Session::put('FTUsrName', $row->FTUsrName);
-	    	// Session::put('FNUsrLevel', $row->FNUsrLevel);
-            // Session::put('UsrName', $row->FTUsrName);
-            // Session::put('UsrCode',$row->FTUsrCode);
 	    	$permission = $Authen->getPermissionMenu($row->FTUsrCode);
              	if(count($permission) > 0){
                     foreach($permission as $row){
-                        return redirect($row->FTMnuName);
+                        $data['status'] = 200;
+                        $data['data']   = $row->FTMnuName;
+                        $data['massage']= 'ยินดีต้อนรับ ';
+                        //return redirect($row->FTMnuName);
                     }
                 }else{
-                    return redirect('/')
-                    ->with('class','alert-aquamarine')
-                    ->with('status','ข้อมูลผู้ใช้ยังไม่ได้กำหนดสิทธิ์การใช้งาน ! ');
+                    $data['status'] = 501;
+                    $data['data']   = $result;
+                    $data['massage']= 'ข้อมูลผู้ใช้ยังไม่ได้กำหนดสิทธิ์การใช้งาน ! ';
+                    // return redirect('/')
+                    // ->with('class','alert-aquamarine')
+                    // ->with('status','ข้อมูลผู้ใช้ยังไม่ได้กำหนดสิทธิ์การใช้งาน ! ');
                 }
         }else{
-
-            $data['status'] = false;
+            $data['status'] = 500;
             $data['data']   = $result;
-            return redirect('/login')
-		    ->with('class','alert-danger')
-		    ->with('status','ไม่พบข้อมูลผู้ใช้งาน กรุณาตรวจสอบข้อมูล !');
+            $data['massage']= 'ไม่พบข้อมูลผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบข้อมูล !';
+            // return redirect('/login')
+		    // ->with('class','alert-danger')
+		    // ->with('status','ไม่พบข้อมูลผู้ใช้งาน กรุณาตรวจสอบข้อมูล !');
         }
         echo json_encode($data);
-	    // if($result != False){
-
-
-		// }else{
-
-		// }
 	}
+
+    public function layout()
+    {
+        $Authen = new Authentication();
+        $data['title'] = 'หน้าหลัก';
+	    $data['permission'] = $Authen->getPermissionMenu(Session('FTUsrCode'));
+        return view('index',compact('data'));
+    }
 
    	public function Logout(Request $request){
    		$request->session()->flush();
@@ -85,9 +90,10 @@ class AuthenticationController extends Controller{
         echo json_encode($data);
    	}
 
-   	public function updatePassword(Request $request){
+   	public function updatePassword(Request $request)
+    {
 	  	$Authen = new Authentication();
-	    $result = $Authen->updatePassword($request->all());
+	    $result = Authentication::updatePassword($request->all());
 	    if($result != False){
 	    	$status = array("status"=>'success');
 		}else{
@@ -96,33 +102,41 @@ class AuthenticationController extends Controller{
 		echo json_encode($status);
 	}
 
-    public function getlog(Request $request){
-        $U = new Authentication();
-        $U ->getlog($request->all());
+    public function getlog(Request $request)
+    {
+        //$U = new Authentication();
+        Authentication::getlog($request->all());
         return response()->json(['data'=>'200']);
 
     }
 
-    public function getlogs(){
+    public function getlogs()
+    {
         $U = new Authentication();
-        $data = $U ->getlogs();
+        $data = Authentication::getlogs();
         return response()->json(['status'=>'200','data'=>$data]);
     }
 
-    public function getuser(){
+    public function getuser()
+    {
         $U = new Authentication();
-        $data = $U ->getuser();
+        $data = Authentication::getuser();
         return response()->json(['data'=>$data]);
     }
 
     public function HPassword(Request $request)
     {
         $U = new Authentication();
-        $result = $U ->updateHashPassword($request->all());
+        $result = Authentication::updateHashPassword($request->all());
         if($result){
             $data['data'] = $result;
         }
         echo json_encode($data);
+    }
+
+    public function Product()
+    {
+        return view('Product');
     }
 
 }
